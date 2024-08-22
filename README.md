@@ -1,236 +1,223 @@
-# Basic CI/CD
+# Simple Docker
 
-Development of a simple **CI/CD** for the *SimpleBashUtils* project. Building, testing, deployment.
+> При старте работы над проектом просим вас постараться хронометрировать время работы над проектом.
+> По завершении работы над проектом просим вас ответить на два вопроса [в этом опросе](https://forms.gle/6qcQSqdQnf7JD1iEA)
+
+Introduction to docker. Developing a simple docker image for your own server.
 
 The russian version of the task can be found in the repository.
-
 
 ## Contents
 
 1. [Chapter I](#chapter-i)
 2. [Chapter II](#chapter-ii) \
-    2.1. [CI/CD basics](#ci-cd-basics)  
-    2.2. [CI basics](#ci-basics)  
-    2.3. [CD basics](#cd-basics)
+    2.1. [nginx](#nginx) \
+    2.2. [Docker](#docker) \
+    2.3. [Dockle](#dockle)
 3. [Chapter III](#chapter-iii) \
-    3.1. [Setting up the gitlab-runner](#part-1-setting-up-the-gitlab-runner)  
-    3.2. [Building](#part-2-building)  
-    3.3. [Codestyle test](#part-3-codestyle-test)   
-    3.4. [Integration tests](#part-4-integration-tests)  
-    3.5. [Deployment stage](#part-5-deployment-stage)  
-    3.6. [Bonus. Notifications](#part-6-bonus-notifications)  
-4. [Chapter IV](#chapter-iv)
+    3.1. [Ready-made docker](#part-1-ready-made-docker) \
+    3.2. [Operations with container](#part-2-operations-with-container) \
+    3.3. [Mini web server](#part-3-mini-web-server) \
+    3.4. [Your own docker](#part-4-your-own-docker) \
+    3.5. [Dockle](#part-5-dockle) \
+    3.6. [Basic Docker Compose](#part-6-basic-docker-compose)
 
 
 ## Chapter I
 
-![basic_ci_cd](misc/images/basic_ci_cd.JPG)
+![simple_docker](misc/images/simple_docker.png)
 
-Planet Earth, United Kingdom of Great Britain and Northern Ireland, London, Oxford Street, ASI office, nowadays.
+Planet Earth, Atlantic Ocean, Her Majesty's Ship "Hood", heading to London, UK, nowadays.
 
-You have had a few days after arriving at the port of London to settle in and explore the city a little, then comes the day on which you had to go to your new job.
+You never liked moving. A lot of fuss, little action. But you managed to find a great job to delve into DevOps world in Foggy Albion.
+And you're not one to let minor difficulties ruin your plans.
 
-Today you arrive in a cab at the door of the company's office, for which you ended up in Albion.
-In the letter you received on the day you arrived, you were given the door code and your office number.
-Surprised by the empty corridors and the deathly silence, you descend a few floors down, where you find your workplace without any problems.
+From your cabin window you hear the sound of the waves, the ship is peacefully rocking on them and you remember your favorite novel about the sea - "Moby Dick".
+Although the flow of the plot is far from straightforward, with many lyrical digressions and philosophical musings, you, like everyone else, associate this book primarily with Moby Dick himself - the white whale.
 
-There you find a recently turned on computer and an intercom in a poor state.
-As you walk in and close the door behind you, a robotic voice emerges from it.
-
-`-` Welcome to the ASI lab's computerised experimental center.
-
-`-` The analysis of your body's characteristics is done. We are ready to begin.
-
-`-` You will be supporting one of our experimental center projects
-
-`-` Your first task will be to create a **CI/CD** for the well-known **cat** and **grep** utilities.
-
-`-` Before starting, we would like to remind you that although learning through play is the main principle of the experimental center, we do not guarantee the absence of injuries and trauma.
-
-`-` For your own safety and the safety of others, please refrain from touching *bzzz* anything at all.
+"Hmm... White whale..." - here you remember that during the long journey you were going to work on docker.
 
 
 ## Chapter II
 
-`-` Your first task requires some explanation. Let me give you a quick introduction.
+### **nginx**
 
-*You were only able to make out the most basic information from the speech that followed, as it felt accelerated by five.*
+**nginx** (pronounced "engine-x") is an open-source reverse proxy server for HTTP, HTTPS, etc. **nginx** is also used as a load balancer, web server and for HTTP caching. The **nginx** project focuses on high parallelism, high performance and low memory usage.
 
-### **CI/CD** basics
 
-Sadly... If something is always done 'manually', it will either work poorly or not work at all.
+**nginx** has one main process and several worker processes.
+The primary task of the main process is to read and check the configuration and manage the worker processes.
+The worker processes perform the actual processing of the requests.
 
-**CI/CD** is a set of principles and practices that enable more frequent and secure deployment of software changes.
+How **nginx** and its modules work is defined in the configuration file. By default, the configuration file is called *nginx.conf*
 
-Reasons for using **CI/CD**:
-- Team development
-- Long software life cycle
-- Shortened release cycle
-- Difficulties in deployment and testing of large systems
-- Human factor
+### **Docker**
 
-**CI/CD** pipeline is a sequence of actions (scripts) for a particular version of the code in the repository,
-which is started automatically when changes are made.
+A container is a new "executable file" that includes all the dependencies the product needs.
 
-### **CI** basics
+The main advantage of containerisation is the isolation of dependencies and a single, simple software start-up point.
 
-**CI** (Continuous Integration) refers to the integration of individual pieces of application code with each other.
-**CI** normally performs two tasks as described below.
+Basic terms:
+- Docker image - the "package" for the application and dependencies (including system ones).
+- Container - an instance of an image, i.e. a 'alive' image.
 
-- BUILD
-    - Checking if the code is being built at all
-    - Prepare the artifacts for the next stages
-- TEST
-    - Codestyle tests
-    - Unit Tests
-    - Integration tests
-    - Other tests you have
-    - Test reports
+**Docker** is a platform that is designed to develop, deploy and run applications in containers.
+**Docker** is the 'de-facto' standard containerisation tool in the industry, but it is not the first or last among containerisation technologies.
 
-### **CD** basics
+The forerunners of **Docker** containers were virtual machines.
+A virtual machine, like a container, isolates the application and its dependencies from the outside environment.
+However, **Docker** containers have advantages over virtual machines.
+For example, they are very easy to port, consume fewer resources, start and run faster.
 
-**CD** (Continuous Delivery) is a continuous integration extension, as it automatically deploys all code changes to the test and/or production environment after the build stage.
-**CD** can perform the following tasks.
+A docker image consists of layers. Each layer describes some change to be performed to the data on the running container.
+The structure of links between layers is hierarchical. There is a base layer on which the other layers are "overlaid".
+The *Dockerfile* is used to create an image. Each instruction in it creates a new layer.
 
-- PUBLISH (If using a deployment docker)
-    - Build container images
-    - Push the images to where they will be taken from for deployment
-- UPDATE CONFIGS
-    - Update configuration on the machines
-- DEPLOY STAGING
-    - Deployment of test environment for manual tests, QA, and other non-automated checks
-    - Can be run manually or automatically if CI stages are passed successfully
-- DEPLOY PRODUCTION
-    - Deploying a new version of the system on 'production'
-    - This stage better be run manually rather than automatically
-    - If you want, you can set it up for a specific branch of the repository only (master, release, etc.)
+### **Dockle**
 
-`-` There you go. If you have any questions, run what I said slowly through your head. I'll be right back.
+**Dockle** is a container image security checking tool that can be used to find vulnerabilities.
+
+Key features and benefits of **Dockle**:
+- searches for vulnerabilities in images
+- helps in creating a proper Dockerfile
+- easy to use, you only need to specify the image name
+- support for *CIS Benchmarks*.
+
+### **Docker Compose**
+
+Docker Compose is a tool for handling tasks related to projects deployment.
+Docker Compose can be helpful if several services are used to keep the project running.
+
+Docker Compose is used to simultaneously manage multiple containers that are part of an application.
+This tool offers the same features as Docker, but allows to work with more complex distributed applications, e.g. microservices.
 
 
 ## Chapter III
 
-As a result of the work you must save two dumps of the virtual machine images described below. \
-**p.s. Do not upload dumps to git under any circumstances!**
+As a result of the work you should provide a report on the first two tasks. Each part of the task describe what should be added to the report once it has been completed. This can be answers to questions, screenshots, etc.
 
-### Part 1. Setting up the **gitlab-runner**
+As a result of the third task you should provide source files for running the web server.
 
-`-` Since you have decided to do CI/CD, you must really, really like testing. I love it too. So let's get started.
-If you need any information, I recommend looking for answers in the official documentation.
+As a result of the fourth and fifth tasks you should provide docker images.
 
-**== Task ==**
+As a result of the sixth task you should provide a *docker-compose.yml* file and the docker images needed to run it (if not provided earlier).
 
-##### Start *Ubuntu Server 20.04 LTS* virtual machine
-*Be prepared to save a dump of the virtual machine image at the end of the project*
+- A report with a .md extension must be uploaded to the repository, in the src folder.
+- All parts of the task should be highlighted in the report as level 2 headings.
+- Within one part of the task, everything that is added to the report must be in the form of the list.
+- Each screenshot in the report must be briefly captioned (what’s in the screenshot).
+- All screenshots must be cropped so that only the relevant part of the screen is shown.
+- It’s allowed to have several task points shown in one screenshot, but they must all be described in the caption.
+- Source files for running the web server from the third task should be uploaded to the repository, in the src/server folder.
+- Docker images from the fourth and fifth tasks should be uploaded to the repository, in the src folder.
 
-##### Download and install **gitlab-runner** on the virtual machine
+- *docker-compose.yml* from the sixth task should be uploaded to the repository, in the src folder.
+- Be prepared to demonstrate your work if necessary.
 
-##### Run **gitlab-runner** and register it for use in the current project (*DO6_CICD*)
-- You will need a URL and a token for runner registration, that can be obtained from the task page on the platform.
+## Part 1. Ready-made docker
 
-### Part 2. Building
-
-`-` The previous test was designed to boost people's self-confidence.
-Now I have readjusted the tests, making them more difficult and less flattering.
-
-**== Task ==**
-
-#### Write a stage for **CI** to build applications from the *C2_SimpleBashUtils* project:
-
-##### In the _gitlab-ci.yml_ file, add a stage to start the building via makefile from the _C2_ project
-
-##### Save post-build files (artifacts) to a random directory with a 30-day retention period.
-
-
-### Part 3. Codestyle test
-
-`-` Congratulations, you've accomplished a completely pointless task. Just kidding. It was necessary for moving on to all the following ones.
+As the final goal of your little practice you have immediately chosen to write a docker image for your own web server, so first you need to deal with a ready-made docker image for the server.
+You chose a pretty simple **nginx**.
 
 **== Task ==**
 
-#### Write a stage for **CI** that runs a codestyle script (*clang-format*):
+##### Take the official docker image from **nginx** and download it using `docker pull`.
+##### Check for the docker image with `docker images`
+##### Run docker image with `docker run -d [image_id|repository]`
+##### Check that the image is running with `docker ps`
+##### View container information with `docker inspect [container_id|container_name]`
+##### From the command output define and write in the report the container size, list of mapped ports and container ip
+##### Stop docker image with `docker stop [container_id|container_name]`
+##### Check that the image has stopped with `docker ps`
+##### Run docker with mapped ports 80 and 443 on the local machine with *run* command
+##### Check that the **nginx** start page is available in the browser at *localhost:80*
+##### Restart docker container with `docker restart [container_id|container_name]`
+##### Check in any way that the container is running
 
-##### If the codefile didn't pass, " fail" the pipeline
+- Add the following screenshots to the report:
+    - the call and output of all commands used in this part of the task;
+    - **nginx** start page at *localhost:80* (address must be shown).
 
-##### In the pipeline, display the output of the *clang-format* utility
+## Part 2. Operations with container
 
-### Part 4. Integration tests
-
-`-` Great, the codestyle test is written. [WHISPERING] I'm talking to you in private. Don't tell anything to your colleagues.
-Between you and me, you're doing very well. [LOUDLY] Let's move on to writing integration tests.
-
-**== Task ==**
-
-#### Write a stage for **CI** that runs your integration tests from the same project:
-
-##### Run this stage automatically only if the build and codestyle test passes successfully
-
-##### If tests didn't pass, fail the pipeline
-
-##### In the pipeline, display the output of the succeeded / failed integration tests
-
-### Part 5. Deployment stage
-
-`-` To complete this task, you must move the executable files to another virtual machine, which will play the role of a production. Good luck.
+Docker image and container are ready. Now we can look into **nginx** configuration and display page status.
 
 **== Task ==**
 
-##### Start the second virtual machine *Ubuntu Server 20.04 LTS*
+##### Read the *nginx.conf* configuration file inside the docker image with the *exec* command
+##### Create a *nginx.conf* file on a local machine
+##### Configure it on the */status* path to return the **nginx** server status page
+##### Copy the created *nginx.conf* file inside the docker image using the `docker cp` command
+##### Restart **nginx** inside the docker image with *exec*
+##### Check that *localhost:80/status* returns the **nginx** server status page
+##### Export the container to a *container.tar* file with the *export* command
+##### Stop the container
+##### Delete the image with `docker rmi [image_id|repository]`without removing the container first
+##### Import the container back using the *import*command
+##### Run the imported container
 
-#### Write a stage for **CD** that "deploys" the project on another virtual machine:
+- Add the following screenshots to the report:
+    - the call and output of all commands used in this part of the task;
+    - the contents of the created *nginx.conf* file;
+    - the **nginx** server status page at *localhost:80/status*.
 
-##### Run this stage manually, if all the previous stages have passed successfully
 
-##### Write a bash script which copies the files received after the building (artifacts) into the */usr/local/bin* directory of the second virtual machine using **ssh** and **scp**
+## Part 3. Mini web server
 
-*Here the knowledge gained from the DO2_LinuxNetwork project can help you*
-
-- Be prepared to explain from the script how the relocation occurs.
-
-##### In the _gitlab-ci.yml_ file, add a stage to run the script you have written
-
-##### In case of an error, fail the pipeline
-
-As a result, you should have applications from the *C2_SimpleBashUtils* (s21_cat and s21_grep) project ready to run on the second virtual machine.
-
-##### Save dumps of virtual machine images
-**p.s. Do not upload dumps to git under any circumstances!**
-- Don't forget to run the pipeline with the last commit in the repository.
-
-### Part 6. Bonus. Notifications
-
-`-` It says that your next task is for Nobel laureates specially.
-It does not say what they won the prize for, but certainly not for their ability to work with **gitlab-runner**.
+It's time to take a little break from the docker to prepare for the last stage. It's time to write your own server.
 
 **== Task ==**
 
-##### Set up notifications of successful/unsuccessful pipeline execution via bot named "[your nickname] DO6 CI/CD" in *Telegram*
-- The text of the notification must contain information on the successful passing of both **CI** and **CD** stages.
-- The rest of the notification text may be arbitrary.
+##### Write a mini server in **C** and **FastCgi** that will return a simple page saying `Hello World!`
+##### Run the written mini server via *spawn-cgi* on port 8080
+##### Write your own *nginx.conf* that will proxy all requests from port 81 to *127.0.0.1:8080*
+##### Check that browser on *localhost:81* returns the page you wrote
+##### Put the *nginx.conf* file under *./nginx/nginx.conf* (you will need this later)
+
+## Part 4. Your own docker
+
+Now everything is ready. You can start writing the docker image for the created server.
+
+**== Task ==**
+
+*When writing a docker image avoid multiple calls of RUN instructions*
+
+#### Write your own docker image that:
+##### 1) builds mini server sources on FastCgi from [Part 3](#part-3-mini- web-server)
+##### 2) runs it on port 8080
+##### 3) copies inside the image written *./nginx/nginx.conf*
+##### 4) runs **nginx**.
+_**nginx** can be installed inside the docker itself, or you can use a ready-made image with **nginx** as base._
+##### Build the written docker image with `docker build`, specifying the name and tag
+##### Check with `docker images` that everything is built correctly
+##### Run the built docker image by mapping port 81 to 80 on the local machine and mapping the *./nginx* folder inside the container to the address where the **nginx** configuration files are located (see [Part 2](#part-2-operations-with-container))
+##### Check that the page of the written mini server is available on localhost:80
+##### Add proxying of */status* page in *./nginx/nginx.conf* to return the **nginx**server status
+##### Restart docker image
+*If everything is done correctly, after saving the file and restarting the container, the configuration file inside the docker image should update itself without any extra steps
+##### Check that *localhost:80/status* now returns a page with **nginx** status
+
+## Part 5. **Dockle**
+
+Once you've written the container, it's never a bad idea to check it for security.
+
+**== Task ==**
+
+##### Check the container from the previous task with `dockle [container_id|container_name]`
+##### Fix the container so that there are no errors or warnings when checking with **dockle**
 
 
-## Chapter IV
+## Part 6. Basic **Docker Compose**
 
-`-` Good. After completing a series of tasks, the employee should go to the break room.
+There, you've finished your warm-up. Wait a minute though...
+Why not try experimenting with deploying a project consisting of several docker images at once?
 
-While you have a free moment in the break room you decide to check your mail, thinking about the weirdness of what is going on.
+**== Task ==**
 
-
-Just before you get your phone out, another person walks into the break room.
-
-`-` Hi, haven't seen you here before.
-
-`-` That would be strange if you had. It's my first day here, huh.
-
-`-`Oh, first day! So, what do you think of our "boss"? - the last words were spoken with an obvious grin
-
-`-` That was the boss? Phew, I'm not the only one who thinks he's weird... and a bit rude? I thought you were all like that in England.
-
-`-` Haha, definitely not, mate. It's just a prank on the newbies, but don't worry everything will be fine tomorrow. By the way, here comes the real boss, looks like he's coming your way. Well, good luck, see you later.
-
-The stranger quickly disappeared and a short man in an expensive suit, with a slight baldness, in his early fifties or sixties, entered the room. Without waiting for you to speak, he said with a subtle, barely noticeable smile:
-
-`-` Oh, you must be Thomas. Truly magnificent performance of the test work. I hope you weren't intimidated by our lovely friend ASI Junior, she spoke highly of you. So, let me tell you more about what we do here in general and what is your role in our company...
-
-
-💡 [Tap here](https://forms.yandex.ru/cloud/641819b3c09c022518e7a4f3/) **to leave your feedback on the project**. Product Team really tries to make your educational experience better.
+##### Write a *docker-compose.yml* file, using which:
+##### 1) Start the docker container from [Part 5](#part-5-dockle) _(it must work on local network, i.e., you don't need to use **EXPOSE** instruction and map ports to local machine)_
+##### 2) Start the docker container with **nginx** which will proxy all requests from port 8080 to port 81 of the first container
+##### Map port 8080 of the second container to port 80 of the local machine
+##### Stop all running containers
+##### Build and run the project with the `docker-compose build` and `docker-compose up` commands
+##### Check that the browser returns the page you wrote on *localhost:80* as before
